@@ -17,14 +17,14 @@ TicketHub is a website that sells tickets for concerts and events. This document
 
 ### Non-functional requirements
 
-| Quality | Requirement |
-|---|---|
-| **Speed** | Browsing pages respond in under 300 ms (95th percentile). Seat map loads in under 500 ms. Holding a seat responds in under 1 second, even during a big sale. |
-| **Correctness** | A seat is **never** sold to two people. A user is never charged for a seat they do not get. Payments are never charged twice if the user retries. Data about sold tickets is never lost. |
-| **Fairness** | During a big sale, people are served roughly in the order they arrived. Bots and people opening many tabs cannot jump the line. A hold gives the user a guaranteed window to pay. |
-| **Availability** | Browsing stays up even if payments are slow. 99.9% uptime, and during a big sale the site slows down gracefully (waiting room) instead of crashing. |
-| **Scalability** | Handles at least 50x normal traffic during a sale without redesign. |
-| **Security** | Passwords hashed, all traffic over HTTPS, card details never stored by us (payment provider handles them). |
+| Quality          | Requirement                                                                                                                                                                              |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Speed**        | Browsing pages respond in under 300 ms (95th percentile). Seat map loads in under 500 ms. Holding a seat responds in under 1 second, even during a big sale.                             |
+| **Correctness**  | A seat is **never** sold to two people. A user is never charged for a seat they do not get. Payments are never charged twice if the user retries. Data about sold tickets is never lost. |
+| **Fairness**     | During a big sale, people are served roughly in the order they arrived. Bots and people opening many tabs cannot jump the line. A hold gives the user a guaranteed window to pay.        |
+| **Availability** | Browsing stays up even if payments are slow. 99.9% uptime, and during a big sale the site slows down gracefully (waiting room) instead of crashing.                                      |
+| **Scalability**  | Handles at least 50x normal traffic during a sale without redesign.                                                                                                                      |
+| **Security**     | Passwords hashed, all traffic over HTTPS, card details never stored by us (payment provider handles them).                                                                               |
 
 **Priority when goals conflict:** correctness first, then fairness, then speed. A slow answer is acceptable; a double-sold seat is not.
 
@@ -51,12 +51,12 @@ TicketHub is a website that sells tickets for concerts and events. This document
 
 ### Comparison
 
-| Metric | Normal day | Big sale (10 min) | Ratio |
-|---|---|---|---|
-| Requests/second (average) | ~6 | ~3,300 | ~550x |
-| Requests/second (vs normal peak) | ~60 | ~3,300 to 7,000 | ~55x to 115x |
-| Tickets sold | 5,000 per **day** | 20,000 in **10 minutes** | 4x a full day's sales in 0.7% of the time |
-| Writes to the same rows | spread over many events | all on one event's seats | extreme contention |
+| Metric                           | Normal day              | Big sale (10 min)        | Ratio                                     |
+| -------------------------------- | ----------------------- | ------------------------ | ----------------------------------------- |
+| Requests/second (average)        | ~6                      | ~3,300                   | ~550x                                     |
+| Requests/second (vs normal peak) | ~60                     | ~3,300 to 7,000          | ~55x to 115x                              |
+| Tickets sold                     | 5,000 per **day**       | 20,000 in **10 minutes** | 4x a full day's sales in 0.7% of the time |
+| Writes to the same rows          | spread over many events | all on one event's seats | extreme contention                        |
 
 **Conclusion:** the average load is easy; the sale is a short, violent spike concentrated on one event. We must design for the spike, and the hard part is not raw volume but **many people competing for the same 20,000 rows at the same time**. We should not scale the whole system for 24/7 peak; instead we absorb the spike with a queue, caching and a few extra servers added just for sale time.
 
@@ -66,16 +66,16 @@ TicketHub is a website that sells tickets for concerts and events. This document
 
 REST over HTTPS, JSON bodies. Authentication via a bearer token (`Authorization: Bearer <token>`). Browsing endpoints are public.
 
-| # | Method and path | Purpose | Auth |
-|---|---|---|---|
-| 1 | `GET /events?city=&date=&q=&page=` | Browse and search events | No |
-| 2 | `GET /events/{eventId}` | Event details | No |
-| 3 | `GET /events/{eventId}/seats` | View seats and their status | No |
-| 4 | `POST /events/{eventId}/holds` | Hold seats for 5 minutes | Yes |
-| 5 | `DELETE /holds/{holdId}` | Release a hold | Yes |
-| 6 | `POST /orders/{orderId}/payments` | Pay for held seats | Yes |
-| 7 | `GET /me/tickets` | View my tickets | Yes |
-| 8 | `POST /events/{eventId}/queue` | Join the waiting room during a big sale | Yes |
+| #   | Method and path                    | Purpose                                 | Auth |
+| --- | ---------------------------------- | --------------------------------------- | ---- |
+| 1   | `GET /events?city=&date=&q=&page=` | Browse and search events                | No   |
+| 2   | `GET /events/{eventId}`            | Event details                           | No   |
+| 3   | `GET /events/{eventId}/seats`      | View seats and their status             | No   |
+| 4   | `POST /events/{eventId}/holds`     | Hold seats for 5 minutes                | Yes  |
+| 5   | `DELETE /holds/{holdId}`           | Release a hold                          | Yes  |
+| 6   | `POST /orders/{orderId}/payments`  | Pay for held seats                      | Yes  |
+| 7   | `GET /me/tickets`                  | View my tickets                         | Yes  |
+| 8   | `POST /events/{eventId}/queue`     | Join the waiting room during a big sale | Yes  |
 
 ### Examples
 
@@ -148,85 +148,85 @@ Relational database (PostgreSQL) because correctness and transactions matter mos
 
 **users**
 
-| Column | Type | Notes |
-|---|---|---|
-| id | bigint PK | |
-| email | text | UNIQUE, NOT NULL |
-| password_hash | text | NOT NULL |
-| name | text | |
-| created_at | timestamptz | |
+| Column        | Type        | Notes            |
+| ------------- | ----------- | ---------------- |
+| id            | bigint PK   |                  |
+| email         | text        | UNIQUE, NOT NULL |
+| password_hash | text        | NOT NULL         |
+| name          | text        |                  |
+| created_at    | timestamptz |                  |
 
 **venues**
 
-| Column | Type | Notes |
-|---|---|---|
-| id | bigint PK | |
-| name | text | |
-| city | text | |
+| Column | Type      | Notes |
+| ------ | --------- | ----- |
+| id     | bigint PK |       |
+| name   | text      |       |
+| city   | text      |       |
 
 **events**
 
-| Column | Type | Notes |
-|---|---|---|
-| id | bigint PK | |
-| venue_id | bigint FK to venues.id | |
-| title | text | |
-| starts_at | timestamptz | |
-| on_sale_at | timestamptz | when tickets go on sale |
-| status | text | DRAFT, ON_SALE, SOLD_OUT, CANCELLED |
+| Column     | Type                   | Notes                               |
+| ---------- | ---------------------- | ----------------------------------- |
+| id         | bigint PK              |                                     |
+| venue_id   | bigint FK to venues.id |                                     |
+| title      | text                   |                                     |
+| starts_at  | timestamptz            |                                     |
+| on_sale_at | timestamptz            | when tickets go on sale             |
+| status     | text                   | DRAFT, ON_SALE, SOLD_OUT, CANCELLED |
 
 **seats** (the physical seats of a venue; a template)
 
-| Column | Type | Notes |
-|---|---|---|
-| id | bigint PK | |
-| venue_id | bigint FK to venues.id | |
-| section, row, number | text | UNIQUE (venue_id, section, row, number) |
+| Column               | Type                   | Notes                                   |
+| -------------------- | ---------------------- | --------------------------------------- |
+| id                   | bigint PK              |                                         |
+| venue_id             | bigint FK to venues.id |                                         |
+| section, row, number | text                   | UNIQUE (venue_id, section, row, number) |
 
 **event_seats** (one row per seat per event; this is what is actually sold)
 
-| Column | Type | Notes |
-|---|---|---|
-| id | bigint PK | |
-| event_id | bigint FK to events.id | |
-| seat_id | bigint FK to seats.id | |
-| price | int | in cents |
-| status | text | AVAILABLE, HELD, SOLD |
-| held_by_order_id | bigint FK to orders.id | NULL unless HELD or SOLD |
-| hold_expires_at | timestamptz | NULL unless HELD |
-| | | **UNIQUE (event_id, seat_id)** |
+| Column           | Type                   | Notes                          |
+| ---------------- | ---------------------- | ------------------------------ |
+| id               | bigint PK              |                                |
+| event_id         | bigint FK to events.id |                                |
+| seat_id          | bigint FK to seats.id  |                                |
+| price            | int                    | in cents                       |
+| status           | text                   | AVAILABLE, HELD, SOLD          |
+| held_by_order_id | bigint FK to orders.id | NULL unless HELD or SOLD       |
+| hold_expires_at  | timestamptz            | NULL unless HELD               |
+|                  |                        | **UNIQUE (event_id, seat_id)** |
 
 **orders**
 
-| Column | Type | Notes |
-|---|---|---|
-| id | bigint PK | |
-| user_id | bigint FK to users.id | |
-| event_id | bigint FK to events.id | |
-| status | text | PENDING, PAID, EXPIRED, CANCELLED |
-| total | int | |
-| hold_expires_at | timestamptz | |
-| idempotency_key | text | UNIQUE per user |
-| created_at | timestamptz | |
+| Column          | Type                   | Notes                             |
+| --------------- | ---------------------- | --------------------------------- |
+| id              | bigint PK              |                                   |
+| user_id         | bigint FK to users.id  |                                   |
+| event_id        | bigint FK to events.id |                                   |
+| status          | text                   | PENDING, PAID, EXPIRED, CANCELLED |
+| total           | int                    |                                   |
+| hold_expires_at | timestamptz            |                                   |
+| idempotency_key | text                   | UNIQUE per user                   |
+| created_at      | timestamptz            |                                   |
 
 **tickets** (created only when an order is paid)
 
-| Column | Type | Notes |
-|---|---|---|
-| id | bigint PK | |
-| order_id | bigint FK to orders.id | |
+| Column        | Type                        | Notes                                             |
+| ------------- | --------------------------- | ------------------------------------------------- |
+| id            | bigint PK                   |                                                   |
+| order_id      | bigint FK to orders.id      |                                                   |
 | event_seat_id | bigint FK to event_seats.id | **UNIQUE**, so a seat can have at most one ticket |
-| qr_code | text | |
+| qr_code       | text                        |                                                   |
 
 **payments**
 
-| Column | Type | Notes |
-|---|---|---|
-| id | bigint PK | |
-| order_id | bigint FK to orders.id | |
-| provider_ref | text | UNIQUE |
-| amount | int | |
-| status | text | |
+| Column       | Type                   | Notes  |
+| ------------ | ---------------------- | ------ |
+| id           | bigint PK              |        |
+| order_id     | bigint FK to orders.id |        |
+| provider_ref | text                   | UNIQUE |
+| amount       | int                    |        |
+| status       | text                   |        |
 
 ### Relationships
 
@@ -380,3 +380,7 @@ flowchart TD
 ### Trade-off 4: Length of the hold (5 minutes)
 
 A short hold makes seats come back faster (more fairness to people waiting) but may not give a slow payer enough time. A long hold is kind to buyers but lets people "hide" seats from others. We pick 5 minutes with a visible countdown, and allow one extension only for orders that have already started payment.
+
+## 8. Conclusion
+
+The ticketing system is designed to handle both normal traffic and high-demand ticket sales while preventing the same seat from being sold more than once. A waiting room controls incoming traffic during major events, while PostgreSQL transactions, row-level locking, and database constraints protect seat availability. Idempotency keys help prevent duplicate orders and payment processing when requests are retried. Redis supports fast seat-map access, while background workers manage expired holds and asynchronous tasks. These decisions balance performance, reliability, data consistency, and cost while allowing the system to scale as demand increases.
