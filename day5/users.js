@@ -1,10 +1,12 @@
-const userList = document.getElementById("userList");
-const filterInput = document.getElementById("filterInput");
-const statusMessage = document.getElementById("statusMessage");
+const loadButton = document.getElementById("load-btn");
+const userList = document.getElementById("users-list");
+const filterInput = document.getElementById("filter-input");
+const statusMessage = document.getElementById("status");
 
 let users = [];
 
 async function loadUsers() {
+  loadButton.disabled = true;
   statusMessage.textContent = "Loading users...";
 
   try {
@@ -18,13 +20,14 @@ async function loadUsers() {
 
     renderUsers(users);
 
-    statusMessage.textContent = "Loaded " + users.length + " users.";
+    statusMessage.textContent = `Loaded ${users.length} users.`;
   } catch (error) {
     statusMessage.textContent =
       "Could not load users. Please check your connection and try again.";
+
     console.error("Error loading users:", error);
   } finally {
-    console.log("User loading process finished.");
+    loadButton.disabled = false;
   }
 }
 
@@ -33,7 +36,7 @@ function renderUsers(list) {
 
   if (list.length === 0) {
     const message = document.createElement("li");
-    message.textContent = "No users found.";
+    message.textContent = "No users match your filter.";
     userList.appendChild(message);
     return;
   }
@@ -50,13 +53,19 @@ function renderUsers(list) {
     const city = document.createElement("p");
     city.textContent = `City: ${user.address.city}`;
 
+    const company = document.createElement("p");
+    company.textContent = `Company: ${user.company.name}`;
+
     listItem.appendChild(name);
     listItem.appendChild(email);
     listItem.appendChild(city);
+    listItem.appendChild(company);
 
     userList.appendChild(listItem);
   });
 }
+
+loadButton.addEventListener("click", loadUsers);
 
 filterInput.addEventListener("input", () => {
   const searchTerm = filterInput.value.toLowerCase().trim();
@@ -65,11 +74,10 @@ filterInput.addEventListener("input", () => {
     return (
       user.name.toLowerCase().includes(searchTerm) ||
       user.email.toLowerCase().includes(searchTerm) ||
-      user.address.city.toLowerCase().includes(searchTerm)
+      user.address.city.toLowerCase().includes(searchTerm) ||
+      user.company.name.toLowerCase().includes(searchTerm)
     );
   });
 
   renderUsers(filteredUsers);
 });
-
-loadUsers();

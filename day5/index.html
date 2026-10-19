@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css" />
     <script src="users.js" defer></script>
   </head>
+
   <body>
     <header>
       <h1>User Directory</h1>
@@ -15,16 +16,18 @@
 
     <main>
       <section>
-        <label for="filterInput">Search users</label>
+        <button type="button" id="load-btn">Load Users</button>
+
+        <label for="filter-input">Search users</label>
         <input
           type="text"
-          id="filterInput"
+          id="filter-input"
           placeholder="Search by name, email, or city..."
         />
 
-        <p id="statusMessage" aria-live="polite">Loading users...</p>
+        <p id="status" aria-live="polite">Click Load Users to begin.</p>
 
-        <ul id="userList"></ul>
+        <ul id="users-list"></ul>
       </section>
     </main>
   </body>
